@@ -1,12 +1,12 @@
 import Image from 'next/image';
-import styles from './Footer.module.css';
+import styles from './footer.module.css';
 
-export default function Footer() {
+export default async function Footer() {
   return (
     <footer className={styles.footer}>
       <Image
         src={'/assets/dogs-footer.svg'}
-        alt="dogs"
+        alt="Dogs"
         width={28}
         height={22}
       />
