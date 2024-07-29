@@ -19,11 +19,11 @@ export default async function Header() {
           />
         </Link>
         {data ? (
-          <Link className={styles.login} href={'/'}>
+          <Link className={styles.login} href={'/conta'}>
             {data.username}
           </Link>
         ) : (
-          <Link className={styles.login} href={'/'}>
+          <Link className={styles.login} href={'/criar'}>
             Login / Criar
           </Link>
         )}

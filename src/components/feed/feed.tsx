@@ -2,7 +2,9 @@
 
 import photosGet, { Photo } from '@/actions/photos-get';
 import { useEffect, useRef, useState } from 'react';
+import Loading from '../helper/loading';
 import FeedPhotos from './feed-photos';
+import styles from './feed.module.css';
 
 export default function Feed({
   photos,
@@ -17,39 +19,19 @@ export default function Feed({
   const [infinite, setInfinite] = useState(photos.length < 6 ? false : true);
 
   const fetching = useRef(false);
-
-  useEffect(() => {
-    if (infinite) {
-      window.addEventListener('scroll', infiniteScroll);
-      window.addEventListener('wheel', infiniteScroll);
-    } else {
-      window.removeEventListener('scroll', infiniteScroll);
-      window.removeEventListener('wheel', infiniteScroll);
-    }
-
-    return () => {
-      window.removeEventListener('scroll', infiniteScroll);
-      window.removeEventListener('wheel', infiniteScroll);
-    };
-  }, [infinite]);
-
-  async function infiniteScroll() {
+  function infiniteScroll() {
     if (fetching.current) return;
     fetching.current = true;
     setLoading(true);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    setTimeout(() => {
       setPage((currentPage) => currentPage + 1);
-    } finally {
       fetching.current = false;
       setLoading(false);
-    }
+    }, 1000);
   }
 
   useEffect(() => {
     if (page === 1) return;
-
     async function getPagePhotos(page: number) {
       const actionData = await photosGet(
         { page, total: 6, user: 0 },
@@ -60,18 +42,33 @@ export default function Feed({
       if (actionData && actionData.data !== null) {
         const { data } = actionData;
         setPhotosFeed((currentPhotos) => [...currentPhotos, ...data]);
-        if (data.length < 6) {
-          setInfinite(false);
-        }
+        if (data.length < 6) setInfinite(false);
       }
     }
     getPagePhotos(page);
   }, [page]);
 
+  useEffect(() => {
+    if (infinite) {
+      window.addEventListener('scroll', infiniteScroll);
+      window.addEventListener('wheel', infiniteScroll);
+    } else {
+      window.removeEventListener('scroll', infiniteScroll);
+      window.removeEventListener('wheel', infiniteScroll);
+    }
+    return () => {
+      window.removeEventListener('scroll', infiniteScroll);
+      window.removeEventListener('wheel', infiniteScroll);
+    };
+  }, [infinite]);
+
   return (
     <div>
       <FeedPhotos photos={photosFeed} />
-      {loading && <p>Carregando...</p>}
+
+      <div className={styles.loadingWrapper}>
+        {infinite ? loading && <Loading /> : <p>Não existem mais postagens.</p>}
+      </div>
     </div>
   );
 }
